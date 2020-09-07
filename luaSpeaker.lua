@@ -2,7 +2,7 @@ Speaker1 = component.proxy('BF5235264354E9825382BEA89C93AD54')
 Speaker2 = component.proxy('A8B5685D4BD19C3E50FF028FD16F50F1')
 pan = component.proxy('544D779941C0B561EC939A8D6BADDCCF')
 
-event.clear()
+
 
 
 
@@ -41,10 +41,11 @@ function repS.thread:run()
 end
 
 function repS.play(components, file, startTime, duration)
+
     start = computer.millis()
     local function durationCheck()
         while repS.playing do
-            repS.thread.sleep()
+            
             now = computer.millis()
             print('duration '..now)
             if now - start >= duration then
@@ -57,7 +58,7 @@ function repS.play(components, file, startTime, duration)
             component:playSound(file,startTime)
         end
         while repS.playing do
-        repS.thread.sleep()
+        
         event.ignoreAll()
         for _,component in pairs(components) do 
             event.listen(component)
@@ -78,6 +79,7 @@ function repS.play(components, file, startTime, duration)
     if duration ~= nil then
         tduration = repS.thread.create(durationCheck)
     end
+    
     repS.thread.run()
 end
 
@@ -137,6 +139,6 @@ Playing File infinite ... is not currently repeated
 repS.play({Speaker1, Speaker2} ,'file', 0)
 --]]
 
-repS.play({Speaker1, Speaker2} ,'file', 0)
+repS.play({Speaker1, Speaker2} ,'1111', 0)
 
 
