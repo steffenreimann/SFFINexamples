@@ -1,2 +1,2 @@
-# STFINexamples
+# SFFINexamples
 Satisfactory Ficsit Networks Examples
