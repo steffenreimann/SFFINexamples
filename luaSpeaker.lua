@@ -16,10 +16,6 @@ function repS.play(components, file, startTime, repetitions)
             event.listen(component)
         end
         local name, type, stat, idk = event.pull()
-        print('repS.repetitions '..repS.repetitions)
-        print('repetitions '..repetitions)
-        print('stat '..stat)
-
         if stat>1 then 
             repS.repetitions = repS.repetitions + 1
             for _,component in pairs(components) do 
@@ -72,5 +68,25 @@ function repS.getRange(components, volume)
     return rArr
 end
 
+--[[ getAllSpeakerNicks --]]
+function repS.getASN(comps)
+    print('comps')
+    print(comps)
+    local rArr = {}
 
-repS.play({Speaker1, Speaker2} ,'1111', 0, 2)
+    for _, comp in pairs(comps) do
+        print('comp')
+        print(comp)
+        if comp == 'SpeakerPole' then
+            
+            table.insert(rArr, comp.nick)
+        end
+    end
+    print('rArr')
+    print(rArr)
+    return rArr
+end
+
+speakers = component.proxy(component.findComponent("SpeakerPole"))
+
+repS.play({Speaker1, Speaker2} ,'1111', 0) 
