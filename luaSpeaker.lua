@@ -1,35 +1,84 @@
 Speaker1 = component.proxy('BF5235264354E9825382BEA89C93AD54')
 Speaker2 = component.proxy('A8B5685D4BD19C3E50FF028FD16F50F1')
+pan = component.proxy('544D779941C0B561EC939A8D6BADDCCF')
+
+event.clear()
+
 
 
 local repS =  {}
 repS.playing = true
-repS.repetitions = 0
+repS.thread = {
+ threads = {},
+ current = 1
+}
 
-function repS.play(components, file, startTime, repetitions)
-    for _,component in pairs(components) do 
-        component:playSound(file,startTime)
+function repS.thread.create(func)
+ local t = {}
+ t.co = coroutine.create(func)
+ function t:stop()
+  for i,th in pairs(repS.thread.threads) do
+   if th == t then
+    table.remove(repS.thread.threads, i)
+   end
+  end
+ end
+ table.insert(repS.thread.threads, t)
+ return t
+end
+
+function repS.thread:run()
+ while true do
+  if #repS.thread.threads < 1 then
+   return
+  end
+  if repS.thread.current > #repS.thread.threads then
+   repS.thread.current = 1
+  end
+  coroutine.resume(true, repS.thread.threads[repS.thread.current].co)
+  repS.thread.current = repS.thread.current + 1
+ end
+end
+
+function repS.play(components, file, startTime, duration)
+    start = computer.millis()
+    local function durationCheck()
+        while repS.playing do
+            repS.thread.sleep()
+            now = computer.millis()
+            print('duration '..now)
+            if now - start >= duration then
+                repS.stop(components)
+            end
+        end
     end
-    while repS.playing do
+    local function mtplay()
+        for _,component in pairs(components) do 
+            component:playSound(file,startTime)
+        end
+        while repS.playing do
+        repS.thread.sleep()
         event.ignoreAll()
         for _,component in pairs(components) do 
             event.listen(component)
         end
         local name, type, stat, idk = event.pull()
-        if stat>1 then 
-            repS.repetitions = repS.repetitions + 1
-            for _,component in pairs(components) do 
+        print('stat')
+        print(stat)
+        if stat>1 then
+            for _,component in pairs(components) do
                 component:playSound(file,startTime)
             end
         elseif stat == 1 then
-        --[[repS.stop(components)
-            return 1--]]
-        elseif repetitions ~= nil and repS.repetitions >= repetitions then
-          --[[  print('Return in rep ')
-            repS.stop(components)
-            return 2--]]
+            return 1
         end
     end
+    end
+    tPlay = repS.thread.create(mtplay)
+    if duration ~= nil then
+        tduration = repS.thread.create(durationCheck)
+    end
+    repS.thread.run()
 end
 
 function repS.stop(components)
@@ -46,7 +95,7 @@ function repS.setVolume(components, volume)
     end
 end
 
-function repS.getVolume(components, volume)
+function repS.getVolume(components)
     local rArr = {}
     for _,component in pairs(components) do
         table.insert(rArr, component:getVolume())
@@ -60,7 +109,7 @@ function repS.setRange(components, volume)
     end
 end
 
-function repS.getRange(components, volume)
+function repS.getRange(components)
     local rArr = {}
     for _,component in pairs(components) do
         table.insert(rArr, component:getRange())
@@ -68,25 +117,26 @@ function repS.getRange(components, volume)
     return rArr
 end
 
---[[ getAllSpeakerNicks --]]
-function repS.getASN(comps)
-    print('comps')
-    print(comps)
-    local rArr = {}
-
-    for _, comp in pairs(comps) do
-        print('comp')
-        print(comp)
-        if comp == 'SpeakerPole' then
-            
-            table.insert(rArr, comp.nick)
-        end
-    end
-    print('rArr')
-    print(rArr)
-    return rArr
+function repS.thread.sleep()
+ event.pull(0.0)
 end
 
-speakers = component.proxy(component.findComponent("SpeakerPole"))
 
-repS.play({Speaker1, Speaker2} ,'1111', 0) 
+--[[
+not working now
+speakers = component.proxy(component.findComponent("SpeakerPole"))
+--]]
+
+--[[
+Playing File with duration
+repS.play({Speaker1, Speaker2} ,'file', 0, 5000)
+--]]
+
+--[[
+Playing File infinite ... is not currently repeated
+repS.play({Speaker1, Speaker2} ,'file', 0)
+--]]
+
+repS.play({Speaker1, Speaker2} ,'file', 0)
+
+
