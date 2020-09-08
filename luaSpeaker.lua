@@ -41,7 +41,7 @@ function repS.thread:run()
 end
 
 function repS.play(components, file, startTime, duration)
-
+        
     start = computer.millis()
     local function durationCheck()
         while repS.playing do
@@ -67,10 +67,12 @@ function repS.play(components, file, startTime, duration)
         print('stat')
         print(stat)
         if stat>1 then
+            print('stat>1')
             for _,component in pairs(components) do
                 component:playSound(file,startTime)
             end
         elseif stat == 1 then
+            print('stat == 1')
             return 1
         end
     end
